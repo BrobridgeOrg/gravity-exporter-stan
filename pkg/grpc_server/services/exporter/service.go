@@ -22,7 +22,7 @@ func NewService(a app.App) *Service {
 
 func (service *Service) SendEvent(ctx context.Context, in *pb.SendEventRequest) (*pb.SendEventReply, error) {
 
-	conn := service.app.GetEventBus().GetConnection()
+	conn := service.app.GetEventBus().GetSTANConnection()
 
 	err := conn.Publish(in.Channel, in.Payload)
 	if err != nil {
