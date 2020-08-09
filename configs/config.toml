@@ -1,0 +1,10 @@
+[service]
+port = 44144
+
+[stan]
+host = "0.0.0.0:32803"
+clusterID = "test-cluster"
+clientName = "gravity-exporter-stan"
+pingInterval = 10
+maxPingsOutstanding = 3
+maxReconnects = -1
