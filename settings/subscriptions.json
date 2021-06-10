@@ -1,0 +1,10 @@
+{
+	"subscriptions": {
+		"users": [
+			"example.userUpdated"
+		],
+		"accounts": [
+			"example.accountUpdated"
+		]
+	}
+}

@@ -1,8 +1,18 @@
-[service]
-port = 44144
+[gravity]
+host = "0.0.0.0:32803"
+
+[subscriber]
+subscriber_id = "stan_exporter"
+subscriber_name = "STAN Exporter"
+state_store = "./statestore"
+worker_count = 4
+verbose = true
+
+[rules]
+subscription = "./settings/subscriptions.json"
 
 [stan]
-host = "0.0.0.0:32803"
+host = "0.0.0.0:4222"
 clusterID = "test-cluster"
 clientName = "gravity-exporter-stan"
 pingInterval = 10

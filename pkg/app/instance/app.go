@@ -1,11 +1,11 @@
 package instance
 
 import (
+	"runtime"
 	"time"
 
 	eventbus "github.com/BrobridgeOrg/gravity-exporter-stan/pkg/eventbus/service"
-	grpc_server "github.com/BrobridgeOrg/gravity-exporter-stan/pkg/grpc_server/server"
-	mux_manager "github.com/BrobridgeOrg/gravity-exporter-stan/pkg/mux_manager/manager"
+	subscriber "github.com/BrobridgeOrg/gravity-exporter-stan/pkg/subscriber/service"
 	"github.com/nats-io/nats.go"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -13,9 +13,8 @@ import (
 
 type AppInstance struct {
 	done       chan bool
-	muxManager *mux_manager.MuxManager
-	grpcServer *grpc_server.Server
 	eventBus   *eventbus.EventBus
+	subscriber *subscriber.Subscriber
 }
 
 func NewAppInstance() *AppInstance {
@@ -29,18 +28,17 @@ func NewAppInstance() *AppInstance {
 
 func (a *AppInstance) Init() error {
 
-	log.Info("Starting application")
+	log.WithFields(log.Fields{
+		"max_procs": runtime.GOMAXPROCS(0),
+	}).Info("Starting application")
 
 	// Initializing modules
-	a.muxManager = mux_manager.NewMuxManager(a)
-	a.grpcServer = grpc_server.NewServer(a)
 	a.eventBus = eventbus.NewEventBus(
 		a,
 		viper.GetString("stan.host"),
 		eventbus.EventBusHandler{
 			Reconnect: func(natsConn *nats.Conn) {
 				log.Warn("re-connected to event server")
-				//a.eventBus.InitSubscription()
 			},
 			Disconnect: func(natsConn *nats.Conn) {
 				log.Error("event server was disconnected")
@@ -55,7 +53,7 @@ func (a *AppInstance) Init() error {
 		},
 	)
 
-	a.initMuxManager()
+	a.subscriber = subscriber.NewSubscriber(a)
 
 	// Initializing EventBus
 	err := a.initEventBus()
@@ -63,8 +61,7 @@ func (a *AppInstance) Init() error {
 		return err
 	}
 
-	// Initializing GRPC server
-	err = a.initGRPCServer()
+	err = a.subscriber.Init()
 	if err != nil {
 		return err
 	}
@@ -77,15 +74,7 @@ func (a *AppInstance) Uninit() {
 
 func (a *AppInstance) Run() error {
 
-	// GRPC
-	go func() {
-		err := a.runGRPCServer()
-		if err != nil {
-			log.Error(err)
-		}
-	}()
-
-	err := a.runMuxManager()
+	err := a.subscriber.Run()
 	if err != nil {
 		return err
 	}
