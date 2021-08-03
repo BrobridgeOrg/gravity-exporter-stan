@@ -10,6 +10,7 @@ import (
 
 	"github.com/BrobridgeOrg/gravity-exporter-stan/pkg/app"
 	"github.com/BrobridgeOrg/gravity-sdk/core"
+	"github.com/BrobridgeOrg/gravity-sdk/core/keyring"
 	gravity_subscriber "github.com/BrobridgeOrg/gravity-sdk/subscriber"
 	gravity_state_store "github.com/BrobridgeOrg/gravity-sdk/subscriber/state_store"
 	gravity_sdk_types_projection "github.com/BrobridgeOrg/gravity-sdk/types/projection"
@@ -147,6 +148,11 @@ func (subscriber *Subscriber) Init() error {
 	options.Domain = domain
 	options.StateStore = subscriber.stateStore
 	options.WorkerCount = viper.GetInt("subscriber.workerCount")
+
+	// Loading access key
+	viper.SetDefault("subscriber.appID", "anonymous")
+	viper.SetDefault("subscriber.accessKey", "")
+	options.Key = keyring.NewKey(viper.GetString("subscriber.appID"), viper.GetString("subscriber.accessKey"))
 
 	subscriber.subscriber = gravity_subscriber.NewSubscriber(options)
 	opts := core.NewOptions()
