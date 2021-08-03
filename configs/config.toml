@@ -3,13 +3,13 @@ domain = "gravity"
 host = "0.0.0.0:32803"
 
 [subscriber]
-subscriber_id = "stan_exporter"
-subscriber_name = "STAN Exporter"
-state_store = "./statestore"
-worker_count = 4
+subscriberID = "stan_exporter"
+subscriberName = "STAN Exporter"
+stateStore = "./statestore"
+workerCount = 4
 verbose = true
-pipeline_start = 0
-pipeline_end = -1
+pipelineStart = 0
+pipelineEnd = -1
 
 [rules]
 subscription = "./settings/subscriptions.json"
